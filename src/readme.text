@@ -1,0 +1,129 @@
+1.创建项目
+    create vue ---
+2.element
+3.发送请求： 原生请求  ajax =>原生的异步请求 
+            axios请求  建立在ajax请求上 做了封装
+            同步、异步 
+            js代码执行的顺序是同步请求 
+            axios异步请求  promise风格的请求 =>  发送请求.then(....)
+
+            ----axios封装：----
+                1.创建api文件夹 
+                    config.js  //  基础路径  请求拦截  响应拦截 （state ： data: ....)
+                    request.js   //axios请求封装 
+                            //获取数据
+                            export function getUserFood() {
+                                return axios({
+                                    url: '/getUserFood',  //请求路径
+                                    method: 'get',      //请求方式
+                                })
+                            }
+            
+            --- vue.config.js 配置反向代理解决跨域问题----
+                module.exports = {
+                    lintOnSave: false,
+                    devServer: {
+                        proxy: {
+                        '/api': {
+                            target: 'http://192.168.20.7:8080/', 
+                            changeOrigin: true, //是否同意跨域
+                            pathRewrite: {
+                                '^/api': ''   //路径重写
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+4.vue的组成
+    template 模板 ---->   html页面  div包裹着
+    js=>
+            1.data (  ){
+                return{
+                    //vue是单页应用 data 形成私有的作用域
+                }
+            }
+            2.methods 事件 方式 函数 要使用data里的数据 
+                this.*
+            3.components 组件 {组件名}
+            4.computed  {  计算属性
+                fun(){return ....}
+            } 
+            5.watch 侦听器 可以侦听data里的值 
+                当值改变，就会触发
+                watch: {
+                    num: {
+                        handler(){
+                            console.log('计算一次');
+                            this.total = this.num * this.price
+                        },
+                        //在页面初始化立即执行侦听器
+                        immediate: true
+                    }
+                }
+    5.vue的生命周期
+        beforeCreate = 创建前
+        created   创建之后  ===>  请求数据
+        beforeMount 被挂载
+        mounted 挂载后   浏览器是BOM  dom节点 
+        beforeUpdate 数据更新钱
+        updated  数据更新后 dom重新渲染
+        beforeDestroy 被销毁之前
+        destroyed 销毁后
+
+    6.this 这个 this的指向问题
+    1.对象
+        obj:{
+            name:"zzz",msg:function(){吃东西}
+        }
+        obj.msg(this.name); 
+    2.function(){} this=> window.domcument
+    3.onclick  this  就是触发事件的元素本身
+    4.setTimetout => window
+
+        fun(){
+            let that=this
+            fun(){
+                that
+            }
+        }
+
+    v-model vue的双向数据绑定 
+    vue 他是mvmc模式   
+    mvc
+    m：model v:view c:controller
+    数据模型 视图 控制 (逻辑)
+    mvvm 
+
+    input v-model="data里的值"
+            :data里的值
+
+6.组件传值
+    父传子
+        1.父组件的data里定义要传递的数据
+        2. 父组件的模板 中 子组件的标签上 定义一个动态属性 => :msg="msg"
+        3.在子组件中，使用props去接收父组件传来的值  可以直接当作data去使用
+
+    子传父
+        1.定义一个事件 使用this.$emit() 方法里的第一个参数是 自定义的事件名，
+            第二个参数是要传递的数
+        2.父组件的模板里 添加这个自定义的事件
+        3.在父组件的methods中写入这个自定义事件，事件的参数就是传递过来的数据
+
+
+7.v-show 和 v-if的区别
+    显示和隐藏          
+        display:none       不显示
+        visiable:none    隐藏
+    v-show   隐藏   不需要 
+    v-if     就是不显示  每次等于true的时候需要重新渲染
+
+
+     
+                            
+
+
+
+
+
