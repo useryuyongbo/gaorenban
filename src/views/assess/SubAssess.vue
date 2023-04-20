@@ -9,21 +9,15 @@
         class="form"
         width="100%"
       >
-        <el-form-item label="申报人">
-          <el-input v-model="form.userName"></el-input>
-        </el-form-item>
-        <el-form-item label="工号">
-          <el-input v-model="form.pno"></el-input>
-        </el-form-item>
-        <el-form-item label="身份证号">
-          <el-input v-model="form.cardId"></el-input>
+        <el-form-item label="comment">
+          <el-input v-model="form.comment"></el-input>
         </el-form-item>
         <el-form-item
           v-for="item in typeList"
-          :key="item.code"
-          :label="item.desc"
+          :key="item.id"
+          :label="item.examitename"
         >
-          <upload :fileClass="item.code" @getList="addFormData"></upload>
+          <upload :fileClass="item.id" @getList="addFormData"></upload>
         </el-form-item>
 
         <el-form-item>
@@ -36,16 +30,22 @@
 
 <script>
 import Upload from "@/components/Upload.vue";
-import { uploadFiles, getDeclareFileType } from "@/api/request";
+import {
+  uploadFiles,
+  getDeclareFileType,
+  checkexamfiletype,
+  uploadBatchexamFile,
+} from "@/api/request";
 
 export default {
   components: { Upload },
   data() {
     return {
       form: {
-        userName: "",
-        pno: "",
-        cardId: "",
+        // userName: "",
+        // pno: "",
+        // cardId: "",
+        comment: "",
       },
       //文件列表集合
       declareList: [],
@@ -54,23 +54,33 @@ export default {
     };
   },
   methods: {
-    //获取所有文件类型
-    getFileType() {
-      getDeclareFileType().then((res) => {
+    // //获取所有文件类型
+    // getFileType() {
+    //   getDeclareFileType().then((res) => {
+    //     console.log(res);
+    //     this.typeList = res.data;
+    //     this.typeList.forEach((item) => {
+    //       this.declareList.push({ classType: item.code, fileList: [] });
+    //     });
+    //   });
+    // },
+    //获取所有考核类别
+    getcheckexamfiletype() {
+      checkexamfiletype().then((res) => {
         this.typeList = res.data;
         this.typeList.forEach((item) => {
-          this.declareList.push({ classType: item.code, fileList: [] });
+          this.declareList.push({ classType: item.id, fileList: [] });
         });
       });
     },
-
     //确认上传
     onSubmit() {
       // 创建新的数据对象
       let formData = new FormData();
 
       // 将剩余信息放到formData对象中
-      formData.append("userId", 1);
+      formData.append("userId", this.$store.state.id);
+      // formData.append("comment", this.form.comment);
 
       // console.log(this.formData.getAll("fileClass"));
       // console.log(this.formData.getAll("file"));
@@ -94,8 +104,15 @@ export default {
       // console.log(formData.getAll("userName"));
 
       // 文件上传接口
-      uploadFiles(formData).then((res) => {
-        console.log(res);
+      uploadBatchexamFile(formData).then((res) => {
+        if (res.message == "success") {
+          this.$message({
+            message: "上传成功",
+            type: "success",
+          });
+        } else {
+          this.$message.error("上传失败");
+        }
       });
     },
 
@@ -112,8 +129,9 @@ export default {
     },
   },
   created() {
-    //获取文件所有类型
-    this.getFileType();
+    //获取考核文件所有类型
+    // this.getFileType();
+    this.getcheckexamfiletype();
   },
 };
 </script>
@@ -122,7 +140,7 @@ export default {
 .sub {
   // width: 4.5rem;
 }
-.form{
+.form {
   margin: 0 auto;
   width: 4.5rem;
 }

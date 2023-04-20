@@ -22,13 +22,13 @@
             <el-table-column fixed="right" label="操作">
               <template slot-scope="scope">
                 <el-button
-                  @click="handleClick(scope.row)"
+                  @click="handleClickdel(scope.row)"
                   type="text"
                   size="small"
                   ><span class="el-icon-delete"></span>删除</el-button
                 >
                 <el-button
-                  @click="handleClick(scope.row)"
+                  @click="handleClickdownload(scope.row)"
                   type="text"
                   size="small"
                   ><span class="el-icon-download"></span>下载</el-button
@@ -41,21 +41,36 @@
     </el-collapse>
     <div class="state" v-if="isShow">
       <el-button type="success" @click="changeState(1)">审核通过</el-button>
+      <el-button type="warning" @click="changeState(3)">退回修改</el-button>
       <el-button type="danger" @click="changeState(2)">审核未通过</el-button>
+    </div>
+    <div>
+      <el-button @click="handleClickdownloadall">下载全部材料</el-button>
     </div>
   </div>
 </template>
 
 <script>
-import { getDeclarefile, changeDeclare } from "@/api/request";
+import {
+  getDeclarefile,
+  changeDeclare,
+  shenbaodelectfile,
+  shenbaodowwnload,
+  shenbaodowwnloadall,
+  downloadexamFile,
+  deleteexamFile,
+  downZipexamFile,
+} from "@/api/request";
 import Back from "@/components/Back";
 export default {
   components: { Back },
+  inject: ["reload"],
   data() {
     return {
       declareid: 0,
       declareList: "",
       userName: "",
+      userid: 0,
       state: "",
       isShow: true,
       //loading
@@ -66,6 +81,56 @@ export default {
     handleClick(id) {
       console.log(id);
     },
+    //删除
+    handleClickdel(file) {
+      var _this = this;
+      shenbaodelectfile(file.id).then((res) => {
+        console.log(res);
+      });
+      _this.reload();
+    },
+    //下载
+    handleClickdownload(file) {
+      console.log(file);
+      shenbaodowwnload(file.id).then((res) => {
+        console.log(res);
+        const blob = res;
+        let url = URL.createObjectURL(blob);
+        const aLink = document.createElement("a");
+        aLink.href = url;
+        aLink.download = file.filename;
+        aLink.click();
+        URL.revokeObjectURL(url);
+      });
+
+      //let filename = file.fileName;
+      //let extname = filename.substring(filename.indexOf("."));
+      //console.log(extname);
+    },
+    //下载全部
+    handleClickdownloadall() {
+      var declareId = this.declareid;
+      var userId = this.userid;
+      shenbaodowwnloadall(declareId, userId).then((res) => {
+        console.log(res);
+        const blob = res;
+        // let url = URL.createObjectURL(blob);
+        // const aLink = document.createElement("a");
+        // aLink.href = url;
+        // aLink.download = this.userName;
+        // aLink.click();
+        // URL.revokeObjectURL(url);
+
+        const url = window.URL.createObjectURL(blob);
+        const link = window.document.createElement("a");
+        link.style.display = "none";
+        link.href = url;
+        link.setAttribute("download", this.userName + "申报材料" + ".zip");
+        document.body.appendChild(link);
+        link.click();
+      });
+    },
+
     //判断审核状态
     getState(stateCord) {
       switch (stateCord) {
@@ -79,6 +144,10 @@ export default {
           break;
         case "2":
           this.state = "管理员已审核，审核未通过";
+          this.isShow = false;
+          break;
+        case "3":
+          this.state = "已被管理员退回";
           this.isShow = false;
           break;
       }
@@ -104,7 +173,7 @@ export default {
               this.$message({
                 type: "success",
                 message: res.message,
-                customClass:"notice"
+                customClass: "notice",
               });
             }
           });
@@ -127,6 +196,8 @@ export default {
         this.userName = res.data.userName;
         //判断审核状态
         this.getState(res.data.state);
+        //获取用户id
+        this.userid = res.data.userId;
       });
     },
   },
@@ -168,9 +239,9 @@ export default {
   color: #6fb7ff;
 }
 // class=" el-icon-success"
-:deep(.el-message__icon){
-  color:#fff;
-  font-size: .16rem !important;
+:deep(.el-message__icon) {
+  color: #fff;
+  font-size: 0.16rem !important;
 }
 // <div role="alert" class="el-message el-message--success notice" style="top: 20px; z-index: 2002;">…</div>flex
 .state {

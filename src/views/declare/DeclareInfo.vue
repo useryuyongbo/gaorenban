@@ -27,22 +27,39 @@
                 placeholder="请选择审核状态"
               >
                 <el-option
-                  v-for="item in auditStatus"
-                  :key="item.id"
-                  :label="item.statusName"
-                  :value="item.id"
+                  v-for="(item, index) in auditStatus"
+                  :key="index"
+                  :label="item"
+                  :value="index"
                 ></el-option>
               </el-select>
             </el-form-item>
           </el-col>
-          
+          <el-col :span="6" :offset="6">
+            <el-form-item label-width="80px">
+              <el-button type="primary" @click="openbox1" plain>增加材料类别</el-button>
+            </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
+      <div>
+        <AddMaterial
+            :AddRecordVisbile = "AddRecordVisbile"
+            @changeShow="show1"
+        ></AddMaterial>
+      </div>
     </div>
+
 
     <!-- 审核信息表格 -->
     <div class="table">
-      <el-table v-loading="loading" :data="declareInfo" border style="width: 100%" height="4rem">
+      <el-table
+        v-loading="loading"
+        :data="declareInfo"
+        border
+        style="width: 100%"
+        height="4rem"
+      >
         <el-table-column
           fixed
           prop="declareid"
@@ -58,7 +75,12 @@
         <el-table-column prop="audittime" label="审核时间"> </el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
           <template slot-scope="scope">
-            <el-button @click="handleClick(scope.row.declareid)" type="text" size="small">查看审核材料</el-button> 
+            <el-button
+              @click="handleClick(scope.row.declareid)"
+              type="text"
+              size="small"
+              >查看审核材料</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -73,16 +95,18 @@
 <script>
 //引入分页组件
 import Pagehelper from "../../components/Pagehelper.vue";
-
-import {getDeclareInfo } from "@/api/request";
+// import SubRecord from "../home/Subrecord.vue";
+import AddMaterial from "../home/addmaterial.vue";
+// import Addprojectitem from "../home/addprojectitem.vue";
+import { getDeclareInfo, declaregetState} from "@/api/request";
 
 export default {
-  components: { Pagehelper },
+  components: { Pagehelper ,AddMaterial},
 
   data() {
     return {
       //loading
-      loading:true,
+      loading: true,
 
       //所有文件数据
       declareInfo: [],
@@ -102,15 +126,17 @@ export default {
       //人才审核状态列表
       auditStatus: [
         {
-            id:0,
-            statusName:'未审核'
-        },{
-            id:1,
-            statusName:'未通过'
-        },{
-            id:2,
-            statusName:'已通过'
-        }
+          id: 0,
+          statusName: "未审核",
+        },
+        {
+          id: 1,
+          statusName: "未通过",
+        },
+        {
+          id: 2,
+          statusName: "已通过",
+        },
       ],
 
       //查询的表单数据
@@ -118,14 +144,35 @@ export default {
         name: "",
         statusId: "",
       },
+      AddRecordVisbile:false
     };
   },
 
   methods: {
+
+    //显示隐藏
+    show1(data) {
+      if (data == "false") {
+        console.log(this.addRecordVisbile);
+        this.AddRecordVisbile = false;
+      } else {
+        this.AddRecordVisbile = true;
+      }
+    },
+    //显示隐藏
+    openbox1() {
+      this.AddRecordVisbile = true;
+      console.log(this.AddRecordVisbile);
+    },
+
+
+
     // 查看个人审核材料
     handleClick(declareid) {
       console.log(declareid);
-      this.$router.push({path: '/home/declare/personDeclare?declareid='+declareid});
+      this.$router.push({
+        path: "/home/declare/personDeclare?declareid=" + declareid,
+      });
     },
 
     //获取所有档案文件
@@ -133,15 +180,20 @@ export default {
       // getUserInfo(this.page.current,this.page.pageSizes[this.page.pageSizesIndex]).then(res=>{
       getDeclareInfo(current, pageSizesIndex, name, state).then((res) => {
         // 获取数据response
-          this.declareInfo=res.data.records;
+        this.declareInfo = res.data.records;
         //关闭loading
-        this.loading=false;
+        this.loading = false;
         //获取总数
-          this.page.total=res.data.total;
+        this.page.total = res.data.total;
         console.log(res.data);
       });
     },
-
+    //获取所有状态
+    getstate() {
+      declaregetState().then((res) => {
+        this.auditStatus = res.data;
+      });
+    },
     //接收分页组件传来的page
     //换页
     changePage(page) {
@@ -155,7 +207,6 @@ export default {
         this.selectForm.statusId
       );
     },
-
 
     //查询
     handlerPageNo() {
@@ -177,10 +228,10 @@ export default {
       this.selectForm.name,
       this.selectForm.statusId
     );
+    this.getstate();
   },
 };
 </script>
-
 
 <style lang="scss" scoped>
 .head {
@@ -196,4 +247,3 @@ export default {
   margin-top: 0.1rem;
 }
 </style>
-

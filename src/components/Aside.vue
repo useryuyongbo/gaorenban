@@ -111,12 +111,15 @@
 
 <script>
 import treeMenu from "../components/TreeMenu.vue";
-import treeData from "../components/AsideRouter.json";
+import treeDatak from "../components/AsideRouter.json";
+import store from "@/store";
 export default {
   components: { treeMenu },
   data() {
     return {
-      treeData,
+      treeData: [],
+      identity: "",
+      treeDatak,
     };
   },
   methods: {
@@ -126,6 +129,13 @@ export default {
     handleClose(key, keyPath) {
       console.log(key, keyPath);
     },
+  },
+  created() {
+    if (this.$store.state.role == "admin1") {
+      this.treeData = this.treeDatak[0];
+    } else if (this.$store.state.role == "admin2") {
+      this.treeData = this.treeDatak[1];
+    }
   },
 };
 </script>

@@ -9,21 +9,27 @@
         class="form"
         width="100%"
       >
-        <el-form-item label="申报人">
-          <el-input v-model="form.userName"></el-input>
+        <el-form-item label="comment">
+          <el-input v-model="form.comment"></el-input>
         </el-form-item>
-        <el-form-item label="工号">
-          <el-input v-model="form.pno"></el-input>
-        </el-form-item>
-        <el-form-item label="身份证号">
-          <el-input v-model="form.cardId"></el-input>
-        </el-form-item>
+
         <el-form-item
           v-for="item in typeList"
           :key="item.code"
           :label="item.desc"
         >
-          <upload :fileClass="item.code" @getList="addFormData"></upload>
+          <el-form-item>
+            <upload :fileClass="item.code" @getList="addFormData"></upload>
+          </el-form-item>
+          <el-form-item v-for="item1 in formdescription" :key="item1.classType">
+            <el-input
+              v-if="item.code == item1.classType"
+              size="medium"
+              placeholder="请输入文件描述内容"
+              v-model="item1.fileDescription"
+            >
+            </el-input>
+          </el-form-item>
         </el-form-item>
 
         <el-form-item>
@@ -43,10 +49,13 @@ export default {
   data() {
     return {
       form: {
-        userName: "",
-        pno: "",
-        cardId: "",
+        // userName: "",
+        // pno: "",
+        // cardId: "",
+        comment: "",
       },
+      //文件描述集合
+      formdescription: [],
       //文件列表集合
       declareList: [],
       //文件类型
@@ -60,8 +69,14 @@ export default {
         this.typeList = res.data;
         this.typeList.forEach((item) => {
           this.declareList.push({ classType: item.code, fileList: [] });
+          let that = this;
+          that.formdescription.push({
+            classType: item.code,
+            fileDescription: "",
+          });
         });
       });
+      console.log(this.formdescription);
     },
 
     //确认上传
@@ -70,7 +85,7 @@ export default {
       let formData = new FormData();
 
       // 将剩余信息放到formData对象中
-      formData.append("userId", 1);
+      // formData.append("userId", 1);
 
       // console.log(this.formData.getAll("fileClass"));
       // console.log(this.formData.getAll("file"));
@@ -80,6 +95,14 @@ export default {
         fileObj.fileList.forEach((file) => {
           formData.append("file", file.raw);
           formData.append("fileClass", fileObj.classType);
+          this.formdescription.forEach((fileDescription) => {
+            if (fileDescription.classType == fileObj.classType) {
+              formData.append(
+                "fileDescription",
+                fileDescription.fileDescription
+              );
+            }
+          });
         });
       });
 
@@ -88,7 +111,7 @@ export default {
         // formData.append(key,formItem);
         formData.append(key, this.form[key]);
       }
-
+      formData.append("userId", this.$store.state.id);
       // console.log(formData.getAll("fileClass"));
       // console.log(formData.getAll("file"));
       // console.log(formData.getAll("userName"));
@@ -96,6 +119,14 @@ export default {
       // 文件上传接口
       uploadFiles(formData).then((res) => {
         console.log(res);
+        if (res.message == "success") {
+          this.$message({
+            message: "上传成功",
+            type: "success",
+          });
+        } else {
+          this.$message.error("上传失败");
+        }
       });
     },
 
@@ -110,10 +141,19 @@ export default {
       });
       // console.log(this.declareList);
     },
+    //创建文件描述
+    // creatdes() {
+    //   console.log("执行");
+    //   console.log(this.declareList);
+    //   this.declareList.forEach((item, index) => {
+    //     console.log("6");
+    //   });
+    // },
   },
   created() {
     //获取文件所有类型
     this.getFileType();
+    // this.creatdes();
   },
 };
 </script>
@@ -122,7 +162,7 @@ export default {
 .sub {
   // width: 4.5rem;
 }
-.form{
+.form {
   margin: 0 auto;
   width: 4.5rem;
 }

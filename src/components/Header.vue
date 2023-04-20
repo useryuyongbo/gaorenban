@@ -5,7 +5,7 @@
 
       <el-dropdown @command="handleCommand">
         <span class="el-dropdown-link demo-type">
-          <el-avatar size="large"> 李缘琪 </el-avatar>
+          <el-avatar size="large"> {{ this.$store.state.name1 }} </el-avatar>
         </span>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="undatePasw">修改密码</el-dropdown-item>
@@ -112,11 +112,11 @@ export default {
         this.dialogFormVisible = true;
       } else if (commandKind == "exit") {
         exit().then((res) => {
-          console.log("tuichu");
+          // console.log("tuichu");
           router.push("/login");
         });
       }
-      console.log(commandKind);
+      // console.log(commandKind);
     },
   },
 };

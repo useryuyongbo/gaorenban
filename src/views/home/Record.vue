@@ -35,18 +35,47 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="6" :offset="6">
+
+          <el-col :span="3">
+            <el-form-item label-width="30px">
+              <el-button type="primary" @click="openbox1" plain
+                >增加档案类别</el-button
+              >
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="6" :offset="3">
             <el-form-item label-width="80px">
-              <el-button type="primary" plain>上传文件</el-button>
+              <el-button type="primary" @click="openbox" plain
+                >上传文件</el-button
+              >
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
     </div>
+    <div>
+      <Addrecorditem
+        :AddRecordVisbile="AddRecordVisbile"
+        @changeShow="show1"
+      ></Addrecorditem>
+    </div>
+    <div>
+      <SubRecord
+        :SubRecordVisbile="SubRecordVisbile"
+        @changeShow="show"
+      ></SubRecord>
+    </div>
 
     <!-- 档案文件表格 -->
     <div class="table">
-      <el-table :data="recordInfo" border style="width: 100%" height="4rem" v-loading="loading">
+      <el-table
+        :data="recordInfo"
+        border
+        style="width: 100%"
+        height="4rem"
+        v-loading="loading"
+      >
         <el-table-column
           fixed
           prop="fileId"
@@ -55,15 +84,26 @@
           v-if="false"
         >
         </el-table-column>
-        <el-table-column v-if="false" prop="fileId" label="文件id"> </el-table-column>
+        <el-table-column v-if="false" prop="fileId" label="文件id">
+        </el-table-column>
         <el-table-column fixed prop="pno" label="工号"> </el-table-column>
         <el-table-column fixed prop="userName" label="姓名"> </el-table-column>
         <el-table-column prop="itemName" label="档案类别"> </el-table-column>
         <el-table-column prop="fileName" label="文件名称"> </el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
           <template slot-scope="scope">
-            <el-button @click="handleClick(scope.row)" type="text" size="small">删除</el-button> 
-            <el-button @click="handleClick(scope.row)" type="text" size="small">下载</el-button>
+            <el-button
+              @click="handleClickdel(scope.row)"
+              type="text"
+              size="small"
+              >删除</el-button
+            >
+            <el-button
+              @click="handleClickdownload(scope.row)"
+              type="text"
+              size="small"
+              >下载</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -78,18 +118,26 @@
 <script>
 //引入分页组件
 import Pagehelper from "../../components/Pagehelper.vue";
+import SubRecord from "../home/Subrecord.vue";
+import Addrecorditem from "../home/addrecorditem.vue";
 
-import { getRecorditem, getFileInfo } from "@/api/request";
+import {
+  getRecorditem,
+  getFileInfo,
+  delectfile,
+  dowwnload,
+} from "@/api/request";
 
 export default {
-  components: { Pagehelper },
+  components: { Pagehelper, SubRecord, Addrecorditem },
+  inject: ["reload"],
 
   data() {
     return {
       //所有文件数据
       recordInfo: [],
       //loading
-      loading:true,
+      loading: true,
       // 分页对象
       page: {
         //总数据
@@ -110,23 +158,71 @@ export default {
         name: "",
         recordItemId: "",
       },
+      // 控制新增编辑弹窗的显示与隐藏
+      SubRecordVisbile: false,
+      AddRecordVisbile: false,
     };
   },
 
   methods: {
-    //点击,发送请求,弹出个人信息，传递参数
-    handleClick(userId) {},
-
+    show(data) {
+      if (data == "false") {
+        this.SubRecordVisbile = false;
+      } else {
+        this.SubRecordVisbile = true;
+      }
+    },
+    show1(data) {
+      if (data == "false") {
+        console.log(this.addRecordVisbile);
+        this.AddRecordVisbile = false;
+      } else {
+        this.AddRecordVisbile = true;
+      }
+    },
+    //打开上传弹出框
+    openbox() {
+      this.SubRecordVisbile = true;
+    },
+    //打开添加档案类别弹出框
+    openbox1() {
+      this.AddRecordVisbile = true;
+      console.log(this.AddRecordVisbile);
+    },
+    //删除
+    handleClickdel(file) {
+      var _this = this;
+      delectfile(file.fileId).then((res) => {
+        console.log(res);
+      });
+      _this.reload();
+    },
+    //下载
+    handleClickdownload(file) {
+      dowwnload(file.fileId).then((res) => {
+        console.log(res);
+        const blob = res;
+        let url = URL.createObjectURL(blob);
+        const aLink = document.createElement("a");
+        aLink.href = url;
+        aLink.download = file.fileName;
+        aLink.click();
+        URL.revokeObjectURL(url);
+      });
+      //let filename = file.fileName;
+      //let extname = filename.substring(filename.indexOf("."));
+      //console.log(extname);
+    },
     //获取所有档案文件
     getInfo(current, pageSizesIndex, name, recordItemId) {
       // getUserInfo(this.page.current,this.page.pageSizes[this.page.pageSizesIndex]).then(res=>{
       getFileInfo(current, pageSizesIndex, name, recordItemId).then((res) => {
         // 获取数据response
-          this.recordInfo=res.data.records;
-          //关闭loading
-          this.loading=false;
+        this.recordInfo = res.data.records;
+        //关闭loading
+        this.loading = false;
         //获取总数
-          this.page.total=res.data.total;
+        this.page.total = res.data.total;
         console.log(res.data);
       });
     },
@@ -161,6 +257,9 @@ export default {
         this.selectForm.name,
         this.selectForm.recordItemId
       );
+      console.log(this.recordLiat)
+      console.log(this.selectForm)
+      console.log(this.recordInfo)
     },
   },
 
@@ -178,7 +277,6 @@ export default {
 };
 </script>
 
-
 <style lang="scss" scoped>
 .head {
   height: 0.5rem;
@@ -193,4 +291,3 @@ export default {
   margin-top: 0.1rem;
 }
 </style>
-

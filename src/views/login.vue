@@ -60,20 +60,22 @@ export default {
         pno: this.form.name,
         password: this.form.password,
       };
-      console.log(data);
       login(data).then((res) => {
         console.log(res);
         if (res.code == 200) {
           // this.$store.replaceState(200);
           if (res.message == "success") {
             this.$store.commit("SET_IMPORT", res.data.password);
-            console.log(this.$store.state.role);
+            this.$store.commit("SET_ID", res.data.id);
+            this.$store.commit("SET_NAME", res.data.name);
+            console.log(this.$store.state);
             router.push("/home");
             this.$message({
               message: "登陆成功",
               type: "success",
               duration: 1,
             });
+            console.log(document.cookie);
           } else {
             this.$message.error(res.message);
           }

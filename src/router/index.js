@@ -41,12 +41,25 @@ const routes = [
         ]
       },
       {
-        path: 'go',
-        name: 'go',      //经费申报
-        component: () => import('../views/home/Go')
+        path: 'expenditure',
+        name: 'expenditure',      //经费申报
+        component: () => import('@/views/SubView'),
+        children:[
+          {
+            path:'go',
+            component: () => import('../views/home/Go')
+          },{
+            path:'gocopy',
+            component: () => import('../views/home/Gocopy.vue')
+          },{
+            path:"gocopyshenhe",
+            component:()=>import('../views/home/Gocopycheck.vue')
+          }
+        ]
       },
       {
-        path: 'assess', //人才考核
+        path: 'assess',
+        name: 'aasses',  //人才考核
         component: () => import('@/views/SubView'),
         children:[
           {
@@ -83,6 +96,39 @@ const routes = [
         name: 'record',      //进入到档案管理
         component: () => import('../views/home/Record')
       },
+      {
+        path:'journal',//日志
+        name:'journal',
+        component:()=>import('../views/home/journal')
+      },
+      {
+        path:'project',//项目申报
+        name:'project',
+        component:()=>import('@/views/SubView'),
+        children:[
+          {
+            path:'projectapplication',
+            component: () => import('../views/home/projectapplication')
+          },{
+            path: 'projectinf',
+            component: () => import('../views/home/projectinf')
+          },,{
+            path: 'projectDeclare',
+            component: () => import('../views/home/projectmaterials')
+          }
+        ]
+      },
+      {
+        path:'treatment',//待遇兑现
+        name:'treatment',
+        component:()=>import('../views/home/treatment')
+      },
+      {
+        path:'experttable',//专家信息表
+        name:'experttable',
+        component:()=>import('../views/home/experttable')
+      }
+
     ]
   },
 ]
